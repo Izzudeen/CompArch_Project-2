@@ -42,10 +42,14 @@ __attribute__ ((aligned (64))) uint64_t spy_array[4096];
  *
  * Describe the algorithm used here.
  *
- *The code grabs the tag bit from the base address by cutting off from the index point
- *The code grabs the index bit from the base address by cutting off from the index point
- *The index buts are then compared against the set to see if it is greater as it should be since the set bits are taken from the index bits
- *if this is true then it is returned that and L1_NUM_Sets does need to be added to the returned value if not it does not need to be added
+ * The tag bits is calculated by getting the number of bits in the base address 
+ * and the bits get shifted to the right by the number of index and offset bits
+ * The index bits is calculated by getting the number of bits in the base address
+ * and shifting to the right by the number of offset bits and gets 6 1s added to the end
+ * index bits and sets are compared ot make sure that the index bits are in bounds
+ * if it is not in bounds it is looped over to the top
+ * if it is not un bounds the num of sets is not added to the index
+ * way makes sure tag bits are different
  *
  *
  *
