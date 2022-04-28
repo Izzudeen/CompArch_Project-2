@@ -51,7 +51,7 @@ __attribute__ ((aligned (64))) uint64_t spy_array[4096];
  * if it is not un bounds the num of sets is not added to the index
  * way makes sure tag bits are different
  *
- *
+ * Same index bits different tag bits
  *
  *
  */
@@ -129,10 +129,17 @@ void trojan(char byte)
      * Your attack code goes in here.
      *
      */
-    // start timers  
-    cycle=0
-    for(i=0,i<,i++)
-    cycle+=
+
+    // traverse eviction set to get into the cache (prime)
+
+    // get base address of the eviction set
+    eviction_set_addr = get_eviction_set_address(trojan_array, set, 0);
+    // traverse eviction set
+    while(eviction_set_addr != NULL) {
+        eviction_set_addr = (uint64_t *)*eviction_set_addr;
+    }
+
+    CPUID();
 
 }
 
@@ -159,12 +166,42 @@ char spy()
     uint64_t *eviction_set_addr;
 
     // Probe the cache line by line and take measurements
+
+    // which sets have been replaces/evicted (those will be longer)
     for (i = 0; i < L1_NUM_SETS; i++) {
         /* TODO:
          * Your attack code goes in here.
          *
          */  
         
+        
+
+        uint64_t start_time;
+        uint64_t end_time;
+
+        // get base address of the eviction set
+        eviction_set_addr = get_eviction_set_address(spy_array, i, 0);
+
+        CPUID();
+        RDTSC(start_time);
+        // traverse eviction set and time
+        while(eviction_set_addr != NULL) {
+            eviction_set_addr = (uint64_t *)*eviction_set_addr;
+        }
+
+        CPUID();
+        RDTSC(end_time);
+
+        uint64_t max_time = 0;
+        uint64_t total_time = end_time - start_time;
+
+        // keep track of max_set with value i that has the max time
+        if (total_time > max_time) {
+            max_time = total_time;
+            max_set = i;
+        }
+
+
     }
     eviction_counts[max_set]++;
 }
